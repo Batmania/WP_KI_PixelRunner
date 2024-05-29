@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Runner</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="intro">
+        <p>In einer friedlichen Pixelwelt lebte Pixel, ein mutiger kleiner Held...</p>
+        <p>Doch eines Tages tauchten mysteriöse Schattenwesen auf und begannen, die Welt in Dunkelheit zu hüllen...</p>
+        <p>Hilf Pixel, die Welt zu retten, indem du Münzen sammelst und den Schattenwesen ausweichst!</p>
+        <button onclick="startGame()">Los geht's!</button>
+    </div>
+
+    <div id="gameArea" class="game-area">
+        <div id="character" class="character"></div>
+        <div id="coin" class="coin"></div>
+        <div id="obstacle" class="obstacle"></div>
+    </div>
+
+    <div class="level-complete" style="display: none;">
+        <p>Pixel hat die Wiese durchquert und betritt nun die düstere Höhle...</p>
+        <button onclick="startNextLevel()">Weiter</button>
+    </div>
+
+    <div class="ending" style="display: none;">
+        <p>Mit all seinen gesammelten Münzen konnte Pixel die Schattenwesen besiegen und die Welt erstrahlte wieder im Licht. Danke für deine Hilfe!</p>
+        <button onclick="restartGame()">Erneut spielen</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
