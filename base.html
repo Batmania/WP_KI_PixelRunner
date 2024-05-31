@@ -19,6 +19,11 @@
         <div id="coin" class="coin"></div>
         <div id="obstacle" class="obstacle"></div>
     </div>
+    
+    <div id="scoreBoard">
+        <p id="score">Punkte: 0</p>
+        <p id="level">Level: 1</p>
+    </div>
 
     <div class="level-complete" style="display: none;">
         <p>Pixel hat die Wiese durchquert und betritt nun die düstere Höhle...</p>
@@ -29,6 +34,10 @@
         <p>Mit all seinen gesammelten Münzen konnte Pixel die Schattenwesen besiegen und die Welt erstrahlte wieder im Licht. Danke für deine Hilfe!</p>
         <button onclick="restartGame()">Erneut spielen</button>
     </div>
+
+    <audio id="jumpSound" src="jump.mp3"></audio>
+    <audio id="coinSound" src="coin.mp3"></audio>
+    <audio id="gameOverSound" src="gameover.mp3"></audio>
 
     <script src="script.js"></script>
 </body>
