@@ -13,8 +13,10 @@ function startGame() {
 
 function playSound(soundId) {
     const sound = document.getElementById(soundId);
+    sound.currentTime = 0; // Setzt den Sound auf den Anfang zurück, falls er bereits abgespielt wird
     sound.play();
 }
+
 
 document.addEventListener('keydown', function(event) {
     const character = document.getElementById('character');
@@ -63,24 +65,6 @@ function collectCoin() {
     }
 }
 
-function checkCollision() {
-    const character = document.getElementById('character');
-    const obstacle = document.getElementById('obstacle');
-
-    const characterRect = character.getBoundingClientRect();
-    const obstacleRect = obstacle.getBoundingClientRect();
-
-    if (characterRect.x < obstacleRect.x + obstacleRect.width &&
-        characterRect.x + characterRect.width > obstacleRect.x &&
-        characterRect.y < obstacleRect.y + obstacleRect.height &&
-        characterRect.y + characterRect.height > obstacleRect.y) {
-        playSound('gameOverSound');
-        alert('Kollision! Spiel vorbei.');
-        document.getElementById('gameArea').style.display = 'none';
-        document.querySelector('.ending').style.display = 'block';
-    }
-}
-
 function placeNewCoin() {
     const coin = document.getElementById('coin');
     coin.style.display = 'block';
@@ -123,7 +107,6 @@ function levelComplete() {
     // Weitere Aktionen bei Levelabschluss...
 }
 
-// Beispielhafte Logik für Levelübergang
 function checkLevelProgress() {
     if (score >= 50 * currentLevel) {  // Beispielhafter Schwellenwert für Levelübergang
         levelComplete();
@@ -131,3 +114,50 @@ function checkLevelProgress() {
 }
 
 setInterval(checkLevelProgress, 100);
+
+//Neu
+
+function placeObstacle() {
+    const obstacle = document.getElementById('obstacle');
+    obstacle.style.display = 'block';
+    obstacle.style.top = Math.random() * (document.getElementById('gameArea').clientHeight - 50) + 'px';
+    obstacle.style.left = Math.random() * (document.getElementById('gameArea').clientWidth - 50) + 'px';
+}
+
+function startNextLevel() {
+    document.querySelector('.level-complete').style.display = 'none';
+    document.getElementById('gameArea').style.display = 'block';
+    currentLevel++;
+    document.getElementById('level').innerText = 'Level: ' + currentLevel;
+    placeObstacle(); // Platzieren eines Hindernisses beim Start des nächsten Levels
+    // Weitere Initialisierungen für das nächste Level...
+}
+
+// Funktion zum Zufälligen Platzieren eines Power-Ups
+function placePowerUp() {
+    const powerUp = document.getElementById('powerUp');
+    powerUp.style.display = 'block';
+    powerUp.style.top = Math.random() * (document.getElementById('gameArea').clientHeight - 25) + 'px';
+    powerUp.style.left = Math.random() * (document.getElementById('gameArea').clientWidth - 25) + 'px';
+}
+
+// Eventlistener für das Sammeln des Power-Ups
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'p') { // Beispielhaftes Tastenkürzel für das Aktivieren des Power-Ups
+        activatePowerUp();
+    }
+});
+
+// Funktion zum Aktivieren des Power-Ups
+function activatePowerUp() {
+    // Hier Implementierung des Power-Up-Effekts, z.B. Geschwindigkeitsboost, Unverwundbarkeit usw.
+    playSound('powerUpSound');
+    // Weitere Logik für den Effekt des Power-Ups
+    setTimeout(() => {
+        // Deaktivierung des Power-Ups nach einer gewissen Zeit oder nach Verbrauch
+        document.getElementById('powerUp').style.display = 'none';
+    }, 5000); // Beispielhafte Dauer des Power-Up-Effekts
+}
+
+
+
