@@ -3,42 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixel Runner</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>2D Jump and Run Spiel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: lightblue;
+        }
+        #gameContainer {
+            width: 800px;
+            height: 600px;
+            position: relative;
+            background-color: lightgreen;
+            border: 2px solid black;
+            overflow: hidden;
+        }
+        #gameArea {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        #character {
+            width: 50px;
+            height: 50px;
+            background: url('character.png') no-repeat center center / cover;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .jumping {
+            animation: jump 0.5s linear;
+        }
+        @keyframes jump {
+            0% { bottom: 0; }
+            50% { bottom: 150px; }
+            100% { bottom: 0; }
+        }
+        #coin {
+            width: 25px;
+            height: 25px;
+            background: url('coin.png') no-repeat center center / cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+        }
+        #obstacle {
+            width: 50px;
+            height: 50px;
+            background: url('obstacle.png') no-repeat center center / cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+        }
+        .intro, .ending, .level-complete {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .intro.active, .ending.active, .level-complete.active {
+            display: block;
+        }
+        #score, #level {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            color: black;
+        }
+    </style>
 </head>
 <body>
-    <div class="intro">
-        <p>In einer friedlichen Pixelwelt lebte Pixel, ein mutiger kleiner Held...</p>
-        <p>Doch eines Tages tauchten mysteriöse Schattenwesen auf und begannen, die Welt in Dunkelheit zu hüllen...</p>
-        <p>Hilf Pixel, die Welt zu retten, indem du Münzen sammelst und den Schattenwesen ausweichst!</p>
-        <button onclick="startGame()">Los geht's!</button>
+    <div class="intro active">
+        <h1>Willkommen zu unserem Jump and Run Spiel!</h1>
+        <button onclick="startGame()">Spiel starten</button>
     </div>
-
-    <div id="gameArea" class="game-area">
-        <div id="character" class="character"></div>
-        <div id="coin" class="coin"></div>
-        <div id="obstacle" class="obstacle"></div>
+    <div id="gameContainer" style="display: none;">
+        <div id="gameArea">
+            <div id="character"></div>
+            <div id="coin"></div>
+            <div id="obstacle"></div>
+            <div id="score">Punkte: 0</div>
+            <div id="level">Level: 1</div>
+        </div>
     </div>
-    
-    <div id="scoreBoard">
-        <p id="score">Punkte: 0</p>
-        <p id="level">Level: 1</p>
+    <div class="level-complete">
+        <h1>Level abgeschlossen!</h1>
+        <button onclick="startNextLevel()">Nächstes Level</button>
     </div>
-
-    <div class="level-complete" style="display: none;">
-        <p>Pixel hat die Wiese durchquert und betritt nun die düstere Höhle...</p>
-        <button onclick="startNextLevel()">Weiter</button>
-    </div>
-
-    <div class="ending" style="display: none;">
-        <p>Mit all seinen gesammelten Münzen konnte Pixel die Schattenwesen besiegen und die Welt erstrahlte wieder im Licht. Danke für deine Hilfe!</p>
-        <button onclick="restartGame()">Erneut spielen</button>
+    <div class="ending">
+        <h1>Spiel vorbei!</h1>
+        <button onclick="location.reload()">Nochmal spielen</button>
     </div>
 
     <audio id="jumpSound" src="jump.mp3"></audio>
     <audio id="coinSound" src="coin.mp3"></audio>
     <audio id="gameOverSound" src="gameover.mp3"></audio>
 
-    <script src="script.js"></script>
+    <script>
+        let score = 0;
+        let currentLevel = 1;
+
+        function startGame() {
+            document.querySelector('.intro').classList.remove('active');
+            document.getElementById('gameContainer').style.display = 'block';
+            document.getElementById('score').innerText = 'Punkte: 0';
+            document.getElementById('level').innerText = 'Level: 1';
+            score = 0;
+            placeNewCoin();
+            placeObstacle();
+        }
+
+        function playSound(soundId) {
+            const sound = document.getElementById(soundId);
+            sound.play();
+        }
+
+        document.addEventListener('keydown', function(event) {
+            const character = document.getElementById('character');
+            const container = document.getElementById('gameContainer');
+            let left = parseInt(window.getComputedStyle(character).left);
+
+            if (event.key === 'ArrowLeft' && left > 0) {
+                character.style.left = left - 10 + 'px';
+            }
+            if (event.key === 'ArrowRight' && left < container.clientWidth - character.clientWidth) {
+                character.style.left = left + 10 + 'px';
+            }
+            if (event.key === ' ') {
+                jump();
+                playSound('jumpSound');
+            }
+        });
+
+        function jump() {
+            const character = document.getElementById('character');
+            if (!character.classList.contains('jumping')) {
+                character.classList.add('jumping');
+                setTimeout(() => {
+                    character.classList.remove('jumping');
+                }, 500);
+            }
+        }
+
+        function collectCoin() {
+            const character = document.getElementById('character');
+            const coin = document.getElementById('coin');
+
+            const characterRect = character.getBoundingClientRect();
+            const coinRect = coin.getBoundingClientRect();
+
+            if (characterRect.x < coinRect.x + coinRect.width &&
+                characterRect.x + characterRect.width > coinRect.x &&
+                characterRect.y < coinRect.y + coinRect.height &&
+                characterRect.y + characterRect.height > coinRect.y) {
+                coin.style.display = 'none';
+                score += 10;
+                document.getElementById('score').innerText = 'Punkte: ' + score;
+                playSound('coinSound');
+                setTimeout(() => {
+                    placeNewCoin();
+                }, 1000);
+            }
+        }
+
+        function placeNewCoin() {
+            const coin = document.getElementById('coin');
+            coin.style.display = 'block';
+            const container = document.getElementById('gameContainer');
+            coin.style.top = Math.floor(Math.random() * (container.clientHeight - coin.clientHeight)) + 'px';
+            coin.style.left = Math.floor(Math.random() * (container.clientWidth - coin.clientWidth)) + 'px';
+        }
+
+        function placeObstacle() {
+            const obstacle = document.getElementById('obstacle');
+            obstacle.style.display = 'block';
+            const container = document.getElementById('gameContainer');
+            obstacle.style.top = Math.floor(Math.random() * (container.clientHeight - obstacle.clientHeight)) + 'px';
+            obstacle.style.left = Math.floor(Math.random() * (container.clientWidth - obstacle.clientWidth)) + 'px';
+        }
+
+        function checkCollision() {
+            const character = document.getElementById('character');
+            const obstacle = document.getElementById('obstacle');
+
+            const characterRect = character.getBoundingClientRect();
+            const obstacleRect = obstacle.getBoundingClientRect();
+
+            if (characterRect.x < obstacleRect.x + obstacleRect.width &&
+                characterRect.x + characterRect.width > obstacleRect.x &&
+                characterRect.y < obstacleRect.y + obstacleRect.height &&
+                characterRect.y + characterRect.height > obstacleRect.y) {
+                playSound('gameOverSound');
+                alert('Kollision! Spiel vorbei.');
+                document.getElementById('gameContainer').style.display = 'none';
+                document.querySelector('.ending').classList.add('active');
+            }
+        }
+
+        setInterval(collectCoin, 50);
+        setInterval(checkCollision, 50);
+
+        function startNextLevel() {
+            document.querySelector('.level-complete').classList.remove('active');
+            document.getElementById('gameContainer').style.display = 'block';
+            currentLevel++;
+            document.getElementById('level').innerText = 'Level: ' + currentLevel;
+            placeObstacle(); // Platzieren eines Hindernisses beim Start des nächsten Levels
+            // Weitere Initialisierungen für das nächste Level...
+        }
+
+        function levelComplete() {
+            document.getElementById('gameContainer').style.display = 'none';
+            document.querySelector('.level-complete').classList.add('active');
+            // Weitere Aktionen bei Levelabschluss...
+        }
+
+        function checkLevelProgress() {
+            if (score >= 50 * currentLevel) {
+                levelComplete();
+            }
+        }
+
+        setInterval(checkLevelProgress, 100);
+    </script>
 </body>
 </html>
